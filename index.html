@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="th"><head><meta charset="utf-8"><title>สมุดรายรับรายจ่าย</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=Mali:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);--bg:#f6f5f1;--card:#fff;--paper:#fbf8ee;--ln:#4a4f6a;--tx:#1d2a26;--mu:#6b7772;--bd:#e3e1da;--in:#1f8a5b;--out:#c9473a;--pri:#1d5c4a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141816;--card:#1e2421;--paper:#222820;--ln:#6d7590;--tx:#eaf0ed;--mu:#93a19a;--bd:#2c3631;--in:#4cc38a;--out:#ef7b6e;--pri:#4cc38a}}
+:root[data-theme="dark"]{--bg:#141816;--card:#1e2421;--paper:#222820;--ln:#6d7590;--tx:#eaf0ed;--mu:#93a19a;--bd:#2c3631;--in:#4cc38a;--out:#ef7b6e;--pri:#4cc38a}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--tx);font:16px/1.45 "Noto Sans Thai",system-ui,sans-serif;padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+main{max-width:560px;margin:0 auto;padding:12px}
+.top{display:flex;gap:8px;margin-bottom:12px}.top select{font-weight:700}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px}
+.seg button{border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:10px;padding:11px 4px;font:inherit;font-size:15px}
+.seg button.on{color:#fff;border-color:transparent}
+label{display:block;font-size:13px;color:var(--mu);margin:10px 0 4px}
+input,select{width:100%;padding:12px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit}
+.amt{font-size:28px;font-weight:700;text-align:right}
+.go{width:100%;margin-top:12px;padding:14px;border:0;border-radius:12px;background:var(--pri);color:#fff;font:inherit;font-weight:700;font-size:16px}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--bd);display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{border:0;background:none;color:var(--mu);padding:10px 0 12px;font:inherit;font-size:12px}
+nav button b{display:block;font-size:20px}nav button.on{color:var(--pri);font-weight:700}
+table.led{width:100%;border-collapse:collapse;background:var(--paper);border:1.5px solid var(--ln);font-size:13px}
+.led th{font-family:Mali,"Noto Sans Thai",cursive;font-weight:500;font-size:14px;border:1px solid var(--ln);padding:6px 3px;text-align:center}
+.led td{border:1px solid var(--ln);padding:0 4px;height:34px;vertical-align:middle}
+.led td.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.led td.d{white-space:nowrap;font-size:12px}.led .t td{font-weight:700;background:#8881}
+.led tr.c{cursor:pointer}
+.row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--bd)}
+.row:last-child{border:0}.sub{font-size:12px;color:var(--mu)}
+.r{text-align:right;white-space:nowrap;font-weight:700}
+.in{color:var(--in)}.out{color:var(--out)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.k{font-size:12px;color:var(--mu)}.v{font-size:20px;font-weight:700}
+.sm{border:1px solid var(--bd);background:none;color:var(--tx);border-radius:8px;padding:6px 10px;font:inherit;font-size:13px}
+.bar{height:6px;border-radius:3px;background:var(--bd);margin-top:4px;overflow:hidden}.bar i{display:block;height:100%}
+.ov{position:fixed;inset:0;background:#0007;display:flex;align-items:flex-end;z-index:9}
+.sheet{background:var(--card);width:100%;max-width:560px;margin:0 auto;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));border-radius:16px 16px 0 0;max-height:90%;overflow:auto}
+.toast{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);background:var(--pri);color:#fff;padding:8px 16px;border-radius:20px;font-size:14px;z-index:10}
+.add{display:flex;gap:8px}.add input{flex:1}.add button{width:auto;margin:0;padding:0 18px}
+</style></head><body>
+<main id="app"></main><nav id="nav"></nav>
+<script>
+const TY={in:['รายรับ','in','#1f8a5b'],out:['รายจ่าย','out','#c9473a']};
+const DEF={in:['เงินเดือน','โบนัส','ขายของ','ดอกเบี้ย','รายรับอื่นๆ'],out:['อาหาร','เดินทาง/น้ำมัน','ค่าน้ำ/ค่าไฟ','ค่าเช่า/ผ่อนบ้าน','โทรศัพท์/อินเทอร์เน็ต','ของใช้ในบ้าน','สุขภาพ','การศึกษา','บันเทิง/ท่องเที่ยว','รายจ่ายอื่นๆ']};
+let S=null,tab='led',ty='out',ct='out',month=new Date().toISOString().slice(0,7);
+const ld=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}};
+S=ld('nb3');
+if(!S){const o=ld('nb2'),o1=ld('nb1');
+ if(o){S={books:o.books,cur:o.cur,cats:{in:[...DEF.in],out:[...DEF.out]},e:[]};
+  o.e.forEach(x=>{const cr=x.t==='ar'||x.t==='ap';const t=(x.t==='in'||x.t==='ar')?'in':'out';
+   if(!cr)S.e.push({id:x.id,b:x.b,t,a:x.a,c:x.c,note:x.note||x.party||'',date:x.date});
+   else if(x.paid>0)S.e.push({id:x.id,b:x.b,t,a:x.paid,c:x.c,note:x.party||x.note||'',date:(x.pays&&x.pays.length?x.pays[x.pays.length-1].d:x.date)})})}
+ else S={books:[{id:1,name:'เล่ม 1',open:0}],cur:1,cats:{in:[...DEF.in],out:[...DEF.out]},e:(o1||[]).filter(x=>x.t==='in'||x.t==='out').map(x=>({id:x.id,b:1,t:x.t,a:x.a,c:x.c,note:x.note||x.party||'',date:x.date}))}}
+const save=()=>{try{localStorage.setItem('nb3',JSON.stringify(S))}catch(e){}};
+const B=()=>S.books.find(b=>b.id===S.cur)||S.books[0],E=()=>S.e.filter(x=>x.b===B().id);
+const f=n=>Number(n||0).toLocaleString('th-TH',{minimumFractionDigits:0,maximumFractionDigits:2});
+const esc=s=>String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const today=()=>new Date().toISOString().slice(0,10);
+const fd=s=>{const[y,m,d]=s.split('-');return+d+'/'+ +m+'/'+String((+y+543)%100).padStart(2,'0')};
+function toast(m){const e=document.createElement('div');e.className='toast';e.textContent=m;document.body.appendChild(e);setTimeout(()=>e.remove(),1600)}
+function sheet(h){const o=document.createElement('div');o.className='ov';o.innerHTML='<div class="sheet">'+h+'</div>';o.onclick=e=>{if(e.target===o)o.remove()};document.body.appendChild(o);return o}
+function confirm2(btn,fn){btn.onclick=()=>{if(btn.dataset.c!=='1'){btn.dataset.c='1';btn.textContent='กดอีกครั้งเพื่อยืนยัน';return}fn()}}
+function render(){
+ document.getElementById('nav').innerHTML=[['led','📒','สมุด'],['add','✏️','บันทึก'],['sum','📊','สรุป'],['cat','🏷️','หมวดหมู่']].map(([k,i,l])=>`<button class="${tab===k?'on':''}" onclick="tab='${k}';render()"><b>${i}</b>${l}</button>`).join('');
+ document.getElementById('app').innerHTML=`<div class="top"><select onchange="S.cur=+this.value;save();render()">${S.books.map(b=>`<option value="${b.id}" ${b.id===B().id?'selected':''}>📘 ${esc(b.name)}</option>`).join('')}</select><button class="sm" onclick="bookUI()" style="white-space:nowrap">⚙️ เล่ม</button></div>`+{led:vLed,add:vAdd,sum:vSum,cat:vCat}[tab]();
+}
+function bookUI(){
+ const b=B(),o=sheet(`<b>จัดการเล่ม</b><label>ชื่อเล่มนี้</label><input id="bn" value="${esc(b.name)}"><label>ยอดยกมา (บาท)</label><input id="bo" type="number" inputmode="decimal" value="${b.open}"><button class="go" id="s1">บันทึกการแก้ไข</button>
+ <label style="margin-top:18px">สร้างเล่มใหม่</label><input id="nn" placeholder="เช่น ครัวเรือน, ส่วนตัว, เงินออม"><button class="go" id="s2" style="background:#2b6cb0">+ สร้างเล่มใหม่</button>${S.books.length>1?'<button class="go" id="s3" style="background:var(--out)">ลบเล่มนี้</button>':''}`);
+ o.querySelector('#s1').onclick=()=>{b.name=o.querySelector('#bn').value.trim()||b.name;b.open=parseFloat(o.querySelector('#bo').value)||0;save();o.remove();render()};
+ o.querySelector('#s2').onclick=()=>{const n=o.querySelector('#nn').value.trim();if(!n)return toast('ใส่ชื่อเล่มก่อน');const id=Date.now();S.books.push({id,name:n,open:0});S.cur=id;save();o.remove();render()};
+ const s3=o.querySelector('#s3');if(s3)confirm2(s3,()=>{S.e=S.e.filter(x=>x.b!==b.id);S.books=S.books.filter(x=>x.id!==b.id);S.cur=S.books[0].id;save();o.remove();render()});
+}
+function vLed(){
+ const R=E().map(x=>({...x,i:x.t==='in'?x.a:0,o:x.t==='out'?x.a:0})).sort((a,b)=>a.date.localeCompare(b.date)||a.id-b.id);
+ let bal=B().open+R.filter(r=>r.date.slice(0,7)<month).reduce((s,r)=>s+r.i-r.o,0),ti=0,to=0;
+ const M=R.filter(r=>r.date.slice(0,7)===month);
+ let h=`<tr class="t"><td></td><td>ยอดยกมา</td><td></td><td></td><td class="n">${f(bal)}</td></tr>`;
+ M.forEach(r=>{bal+=r.i-r.o;ti+=r.i;to+=r.o;h+=`<tr class="c" onclick="rowUI(${r.id})"><td class="d">${fd(r.date)}</td><td>${esc(r.c)}${r.note?' – '+esc(r.note):''}</td><td class="n in">${r.i?f(r.i):''}</td><td class="n out">${r.o?f(r.o):''}</td><td class="n">${f(bal)}</td></tr>`});
+ for(let i=M.length;i<10;i++)h+='<tr><td></td><td></td><td></td><td></td><td></td></tr>';
+ h+=`<tr class="t"><td></td><td>รวมเดือนนี้</td><td class="n in">${f(ti)}</td><td class="n out">${f(to)}</td><td class="n">${f(bal)}</td></tr>`;
+ return `<input type="month" value="${month}" onchange="month=this.value;render()" style="margin-bottom:10px"><table class="led"><thead><tr><th style="width:17%">ว/ด/ป</th><th>รายการ</th><th style="width:17%">รายรับ</th><th style="width:17%">รายจ่าย</th><th style="width:19%">คงเหลือ</th></tr></thead><tbody>${h}</tbody></table><div class="sub" style="margin-top:8px">แตะแถวเพื่อแก้ไข / ลบรายการ</div>`;
+}
+function rowUI(id){
+ const x=S.e.find(y=>y.id===id),o=sheet(`<b>แก้ไขรายการ</b><label>จำนวนเงิน</label><input id="ea" class="amt" type="number" inputmode="decimal" value="${x.a}"><label>หมวดหมู่</label><select id="ec">${catOpts(x.t,x.c)}</select><label>รายการ</label><input id="en" value="${esc(x.note)}"><label>วันที่</label><input id="ed" type="date" value="${x.date}"><button class="go" id="sv">บันทึก</button><button class="go" id="dl" style="background:var(--out)">ลบรายการนี้</button>`);
+ o.querySelector('#sv').onclick=()=>{const a=parseFloat(o.querySelector('#ea').value);if(!(a>0))return toast('ใส่จำนวนเงิน');x.a=a;x.c=o.querySelector('#ec').value;x.note=o.querySelector('#en').value.trim();x.date=o.querySelector('#ed').value||x.date;save();o.remove();render()};
+ confirm2(o.querySelector('#dl'),()=>{S.e=S.e.filter(y=>y.id!==id);save();o.remove();render()});
+}
+function catOpts(t,cur){const l=[...S.cats[t]];if(cur&&!l.includes(cur))l.push(cur);return l.map(c=>`<option ${c===cur?'selected':''}>${esc(c)}</option>`).join('')}
+function vAdd(){
+ return `<div class="seg">${Object.keys(TY).map(k=>`<button class="${ty===k?'on':''}" style="${ty===k?'background:'+TY[k][2]:''}" onclick="ty='${k}';render()">${TY[k][0]}</button>`).join('')}</div>
+ <div class="card"><label>จำนวนเงิน (บาท)</label><input id="a" class="amt" type="number" inputmode="decimal" placeholder="0.00">
+ <label>หมวดหมู่</label><select id="c">${catOpts(ty)}</select>
+ <label>รายการ / หมายเหตุ (ไม่บังคับ)</label><input id="n" placeholder="เช่น ข้าวมื้อเที่ยง">
+ <label>วันที่</label><input id="d" type="date" value="${today()}">
+ <button class="go" style="background:${TY[ty][2]}" onclick="add()">บันทึก${TY[ty][0]}</button></div>`;
+}
+function add(){
+ const g=i=>(document.getElementById(i)||{}).value||'',a=parseFloat(g('a'));
+ if(!(a>0))return toast('กรุณาใส่จำนวนเงิน');if(!g('c'))return toast('เพิ่มหมวดหมู่ก่อน');
+ const d=g('d')||today();S.e.push({id:Date.now(),b:B().id,t:ty,a,c:g('c'),note:g('n').trim(),date:d});
+ save();toast('บันทึกแล้ว ✓');month=d.slice(0,7);tab='led';render();
+}
+function vCat(){
+ return `<div class="seg">${Object.keys(TY).map(k=>`<button class="${ct===k?'on':''}" style="${ct===k?'background:'+TY[k][2]:''}" onclick="ct='${k}';render()">${TY[k][0]}</button>`).join('')}</div>
+ <div class="card"><div class="add"><input id="nc" placeholder="ชื่อหมวดหมู่ใหม่"><button class="go" onclick="addCat()">+ เพิ่ม</button></div></div>
+ <div class="card">${S.cats[ct].length?S.cats[ct].map((c,i)=>`<div class="row"><div>${esc(c)}<div class="sub">${S.e.filter(x=>x.t===ct&&x.c===c).length} รายการ</div></div><button class="sm" onclick="catUI(${i})">✏️ แก้ไข</button></div>`).join(''):'<div class="sub">ยังไม่มีหมวดหมู่</div>'}
+ <button class="sm" style="width:100%;margin-top:10px;padding:10px" onclick="resetCat()">คืนค่าหมวดหมู่เริ่มต้น</button></div>`;
+}
+function addCat(){const n=document.getElementById('nc').value.trim();if(!n)return;if(S.cats[ct].includes(n))return toast('มีหมวดนี้แล้ว');S.cats[ct].push(n);save();render()}
+function resetCat(){const o=sheet(`<b>คืนค่าหมวดหมู่${TY[ct][0]}เริ่มต้น?</b><div class="sub">รายการที่บันทึกไว้แล้วจะไม่ถูกลบ</div><button class="go" id="ok">ยืนยัน</button>`);o.querySelector('#ok').onclick=()=>{S.cats[ct]=[...DEF[ct]];save();o.remove();render()}}
+function catUI(i){
+ const old=S.cats[ct][i],o=sheet(`<b>แก้ไขหมวดหมู่</b><label>ชื่อหมวด</label><input id="cn" value="${esc(old)}"><div class="sub" style="margin-top:6px">เปลี่ยนชื่อแล้ว รายการเก่าในหมวดนี้จะเปลี่ยนตามทุกเล่ม</div><button class="go" id="sv">บันทึกชื่อ</button><div class="grid" style="margin:12px 0 0"><button class="go" style="margin:0;background:var(--card);color:var(--tx);border:1px solid var(--bd)" id="up">↑ เลื่อนขึ้น</button><button class="go" style="margin:0;background:var(--card);color:var(--tx);border:1px solid var(--bd)" id="dn">↓ เลื่อนลง</button></div><button class="go" id="dl" style="background:var(--out)">ลบหมวดนี้</button><div class="sub" style="margin-top:6px">ลบแล้วรายการเก่ายังอยู่ แต่จะไม่อยู่ในรายการให้เลือกอีก</div>`);
+ o.querySelector('#sv').onclick=()=>{const n=o.querySelector('#cn').value.trim();if(!n)return;if(n!==old&&S.cats[ct].includes(n))return toast('มีหมวดนี้แล้ว');S.cats[ct][i]=n;S.e.forEach(x=>{if(x.t===ct&&x.c===old)x.c=n});save();o.remove();render()};
+ const mv=d=>{const j=i+d,L=S.cats[ct];if(j<0||j>=L.length)return;[L[i],L[j]]=[L[j],L[i]];save();o.remove();render()};
+ o.querySelector('#up').onclick=()=>mv(-1);o.querySelector('#dn').onclick=()=>mv(1);
+ confirm2(o.querySelector('#dl'),()=>{S.cats[ct].splice(i,1);save();o.remove();render()});
+}
+function vSum(){
+ const A=E(),L=A.filter(x=>x.date.slice(0,7)===month),T2=t=>L.filter(x=>x.t===t).reduce((s,x)=>s+x.a,0),ri=T2('in'),ro=T2('out');
+ const all=B().open+A.reduce((s,x)=>s+(x.t==='in'?x.a:-x.a),0);
+ const by=t=>{const m={};L.filter(x=>x.t===t).forEach(x=>m[x.c]=(m[x.c]||0)+x.a);const tot=t==='in'?ri:ro;
+  return Object.entries(m).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div style="padding:7px 0"><div style="display:flex;justify-content:space-between"><span>${esc(k)}</span><b class="${t}">${f(v)} <span class="sub">(${Math.round(v/tot*100)}%)</span></b></div><div class="bar"><i style="width:${v/tot*100}%;background:var(--${t})"></i></div></div>`).join('')||'<div class="sub">ยังไม่มีข้อมูล</div>'};
+ const bx=(k,v,c)=>`<div class="card" style="margin:0"><div class="k">${k}</div><div class="v ${c||''}">${f(v)}</div></div>`;
+ return `<input type="month" value="${month}" onchange="month=this.value;render()" style="margin-bottom:12px">
+ <div class="grid">${bx('รายรับเดือนนี้',ri,'in')}${bx('รายจ่ายเดือนนี้',ro,'out')}${bx('เหลือเดือนนี้',ri-ro,ri-ro<0?'out':'in')}${bx('เงินคงเหลือทั้งเล่ม',all,all<0?'out':'')}</div>
+ <div class="card"><b>รายจ่ายตามหมวด</b>${by('out')}</div><div class="card"><b>รายรับตามหมวด</b>${by('in')}</div>
+ <button class="sm" style="width:100%;padding:12px" onclick="csv()">⬇️ ส่งออก CSV (เล่มนี้)</button>`;
+}
+function csv(){
+ const q=s=>'"'+String(s||'').replace(/"/g,'""')+'"';
+ const b=new Blob(['\ufeffวันที่,ประเภท,หมวด,รายการ,จำนวน\n'+E().sort((a,b)=>a.date.localeCompare(b.date)).map(x=>[x.date,TY[x.t][0],x.c,x.note,x.a].map(q).join(',')).join('\n')],{type:'text/csv'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=B().name+'.csv';a.click();
+}
+render();
+</script></body></html>
